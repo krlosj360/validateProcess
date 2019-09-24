@@ -503,7 +503,7 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 
 
 							offere.setIdOffer(idPlan);
-							String ivaMongo = consultMongo.mongoParametrosCo("iva");
+							String ivaMongo = consultMongo.mongoParametrosIva("iva");
 
 							switch(tipoTransaccion) {
 
@@ -754,7 +754,7 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 										isOffer(cuotaMensualNew);
 									} 
 
-									if(!precioContadoEquipo.equals("")) {
+									if(!precioContadoEquipo.equals("") && !precioContadoEquipo.equals("0")) {
 										processCash();
 										if(!resultadoEquipo.get(FINANCIAR).equals("")&& resultadoEquipo.get(FINANCIAR).equals(APROBADO)) {
 											Double mesesBase = Double.parseDouble(plazoBase);	

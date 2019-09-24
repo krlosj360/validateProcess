@@ -19,14 +19,34 @@ public class ConsultMongo {
 	
 	@Autowired
 	private IParametrosEcommerceRepository patametrosRepository;
+	
+	 List<ParametrosEcommerce>   primaries = null;
 
 	String resultadoParametros = null;
 
 	public String mongoParametrosCo(String name) {
 		resultadoParametros = null;
-		List<ParametrosEcommerce> primaries = patametrosRepository.findAll();
-		primaries.forEach(x ->{ if(x.getName().equals(name)) {resultadoParametros = x.getValue();}});
-		return resultadoParametros;
+		try {
+			primaries = patametrosRepository.findAll();
+			primaries.forEach(x ->{ if(x.getName().equals(name)) {resultadoParametros = x.getValue();}});
+			return resultadoParametros;
+			
+		} catch (Exception e) {
+			return resultadoParametros;
+		}
+	
+	}
+	
+	public String mongoParametrosIva(String name) {
+		resultadoParametros = null;
+		try {
+			primaries.forEach(x ->{ if(x.getName().equals(name)) {resultadoParametros = x.getValue();}});
+			return resultadoParametros;
+			
+		} catch (Exception e) {
+			return resultadoParametros;
+		}
+	
 	}
 
 
