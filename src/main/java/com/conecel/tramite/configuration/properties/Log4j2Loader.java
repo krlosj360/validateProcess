@@ -14,8 +14,8 @@ import lombok.extern.log4j.Log4j2;
 public class Log4j2Loader {
 
 
-	private String log4j2DirectoryFile="C:\\Users\\HITSS\\Documents\\log\\ValidacionProcess\\config\\log4j2.xml";
-	//private String log4j2DirectoryFile="/ecommerce/config/log4j2.xml";
+	//private String log4j2DirectoryFile="C:\\Users\\HITSS\\Documents\\log\\ValidacionProcess\\config\\log4j2.xml";
+	private String log4j2DirectoryFile="/ecommerce/config/log4j2.xml";
 	@Bean
 	public String init(){	
 		String loggerConfig = log4j2DirectoryFile;

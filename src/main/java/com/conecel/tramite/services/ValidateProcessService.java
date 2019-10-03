@@ -132,7 +132,8 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 
 						consultaRUrlJeis = consultaRest.consultJeisRequest(resultJson);
 
-						if((tipoTransaccion.equals(RENOVACION) && validation.isNumeric(phoneNumber))|| (tipoTransaccion.equals(LINEANUEVA) && !validation.isNumeric(phoneNumber))) {
+						if((tipoTransaccion.equals(RENOVACION) && validation.isNumeric(phoneNumber) && ((identificationNumber.length() == 13 && identificationType.equals("RUC")) ||  (( identificationNumber.length() == 10  && identificationType.equals("CED"))))
+										|| (tipoTransaccion.equals(LINEANUEVA) && !validation.isNumeric(phoneNumber) && ((identificationNumber.length() == 13 && identificationType.equals("RUC")) ||  (( identificationNumber.length() == 10  && identificationType.equals("CED"))))))) {
 							if(validation.isNumeric(phoneNumber)) {
 								newNumero = validation.obtieneTelefonoDNS(phoneNumber, "LEG");
 								log.info("Actual Numero: " + phoneNumber);
@@ -462,9 +463,23 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 
 
 
+						} else if (tipoTransaccion.equals(RENOVACION)) {
+
+							if(identificationNumber.length() != 10  || identificationNumber.length() != 13) {
+								code = MENOSUNO;
+								message = "identificationNumber invalid";
+
+							} else if(!validation.isNumeric(phoneNumber)) {
+								code = MENOSUNO;
+								message = "serviceNumber invalid";
+
+
+							}
+
+
 						} else {
 							code = MENOSUNO;
-							message = "serviceNumber invalid";
+							message = "identificationNumber invalid";
 
 						}
 
@@ -475,26 +490,26 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 							//----------------------------------------------------------------------------
 
 							log.info("Lista Negra -"+processResult.getBlackList()+" Manual Cola -"+ processResult.getManualQueue() + " Deuda - "+processResult.getDebt() +": Tramite - "+processResult.getApproved());
-							
+
 							SoapEntity consultPrecio =new SoapEntity();
 							consultPrecio=consultaRest.consultPriceEqu(newNumero,identificadorEquipo, idPlan,tipoTransaccion, resultJson);
 							resultadoEquipo =  servicebusiness.procesoPrecioEquipo(consultPrecio);
 
 							if((tipoTransaccion.equals(RENOVACION)||tipoTransaccion.equals(LINEANUEVA)) && resultadoEquipo.get("code").equals("0")) {
-	
-									log.info("Obtener Detalle Equipment");
-									log.info("Response Precio de Equipment: " + resultadoEquipo.toString());
-									precioContadoEquipo = resultadoEquipo.get("PRECIO_LIBRE");
-									precioFinanciamientoEquipo = resultadoEquipo.get("PRECIO_FINANCIADO");
-									plazoBase = resultadoEquipo.get("PLAZOS");
-									cuotaMensualNew = resultadoEquipo.get("TARIFA_BASICA");
-									log.info("PRECIO DEL EQUIPO CONTADO - "+ identificadorEquipo + ": "+ precioContadoEquipo);
-									log.info("FINANCIAR - "+resultadoEquipo.get("FINANCIAR"));
-									log.info("PRECIO DEL EQUIPO FINANCIAMIENTO - "+ identificadorEquipo + ": "+ precioFinanciamientoEquipo);
-									log.info("TARIFA BASICA DEL PLAN -"+idPlan+": "+ cuotaMensualNew);
-									log.info("DETALLE DEL PLAN -"+resultadoEquipo.get("NOMBRE_PLAN"));
-									log.info("TIPO PRODUCTO -"+resultadoEquipo.get("TIPOS_PRODUCTOS"));									
-									log.info("Fin Detalle Equipment");
+
+								log.info("Obtener Detalle Equipment");
+								log.info("Response Precio de Equipment: " + resultadoEquipo.toString());
+								precioContadoEquipo = resultadoEquipo.get("PRECIO_LIBRE");
+								precioFinanciamientoEquipo = resultadoEquipo.get("PRECIO_FINANCIADO");
+								plazoBase = resultadoEquipo.get("PLAZOS");
+								cuotaMensualNew = resultadoEquipo.get("TARIFA_BASICA");
+								log.info("PRECIO DEL EQUIPO CONTADO - "+ identificadorEquipo + ": "+ precioContadoEquipo);
+								log.info("FINANCIAR - "+resultadoEquipo.get("FINANCIAR"));
+								log.info("PRECIO DEL EQUIPO FINANCIAMIENTO - "+ identificadorEquipo + ": "+ precioFinanciamientoEquipo);
+								log.info("TARIFA BASICA DEL PLAN -"+idPlan+": "+ cuotaMensualNew);
+								log.info("DETALLE DEL PLAN -"+resultadoEquipo.get("NOMBRE_PLAN"));
+								log.info("TIPO PRODUCTO -"+resultadoEquipo.get("TIPOS_PRODUCTOS"));									
+								log.info("Fin Detalle Equipment");
 
 							} else {
 
@@ -504,6 +519,8 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 
 							offere.setIdOffer(idPlan);
 							String ivaMongo = consultMongo.mongoParametrosIva("iva");
+
+							mongoIva  = Double.parseDouble(ivaMongo);	
 
 							switch(tipoTransaccion) {
 
@@ -747,9 +764,9 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 									processOptions.setRecurrentPayment(null);
 									processOptions.setChangeOffer(null);
 									processOptions.setRecurrentCashPayment(null);
-									
+
 									nameAndTypeProdcut();
-									
+
 									if(!cuotaMensualNew.equals("")) {
 										isOffer(cuotaMensualNew);
 									} 
@@ -775,21 +792,21 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 								} else {
 
 									nameAndTypeProdcut();
-									
+
 									if(processResult.getBlackList().equals(APROBADO)|| processResult.getDebt().equals(APROBADO)) {
 										processOptions.setRecurrentCashPayment(NEGADO);
 										processOptions.setRecurrentPayment(NEGADO);
 									} else {
 										processOptions.setRecurrentPayment(null);
 										processOptions.setRecurrentCashPayment(null);
-										
+
 									}
 
 									processOptions.setFinancingClaro(NEGADO);
 									processOptions.setInitialQuota(null);
 									processOptions.setCashPayment(NEGADO);
 									processOptions.setChangeOffer(null);
-									
+
 
 									if(!precioContadoEquipo.equals("") && !precioContadoEquipo.equals("0")) {
 										processCash();
@@ -996,6 +1013,6 @@ public class ValidateProcessService extends ProccessBussinnes implements IReliab
 			offere.setTypeProduct(resultadoEquipo.get(TIPOS_PRODUCTOS));
 
 		}
-		
+
 	}
 }
